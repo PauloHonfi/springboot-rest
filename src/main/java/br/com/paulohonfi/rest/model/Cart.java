@@ -1,6 +1,7 @@
 package br.com.paulohonfi.rest.model;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.Entity;
@@ -22,6 +23,12 @@ import br.com.paulohonfi.rest.type.StatusType;
 public class Cart implements Serializable {
 
 	private static final long serialVersionUID = -8436277090365440431L;
+	
+	public Cart() {
+		this.status = StatusType.ACTIVE;
+		this.products = new ArrayList<Product>();
+		this.total = 0D;
+	}
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -81,6 +88,9 @@ public class Cart implements Serializable {
 	 * @return the total
 	 */
 	public Double getTotal() {
+		for (Product product : this.products) {
+			this.total += product.getPrice();
+		}
 		return total;
 	}
 

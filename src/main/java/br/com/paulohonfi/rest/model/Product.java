@@ -8,14 +8,13 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 /**
- * @author Paulo Honfi
- * Site: www.paulohonfi.com.br
+ * @author Paulo Honfi Site: www.paulohonfi.com.br
  * @Since 2021-05
  */
 @Entity
 public class Product implements Serializable {
 
-	private static final long serialVersionUID = 7945060284398978293L;
+	private static final long serialVersionUID = 4677545358809950386L;
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,6 +23,8 @@ public class Product implements Serializable {
 	private String sku;
 
 	private String name;
+
+	private int quantity;
 
 	private int quantityStock;
 
@@ -71,6 +72,20 @@ public class Product implements Serializable {
 	 */
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	/**
+	 * @return the quantity
+	 */
+	public int getQuantity() {
+		return quantity;
+	}
+
+	/**
+	 * @param quantity the quantity to set
+	 */
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
 	}
 
 	/**

@@ -34,8 +34,8 @@ public class ProductService {
 			result = productRepository.save(product);
 		} else {
 			productRepository.delete(result);
-			product.setQuantityStock(product.getQuantityStock() - 1);
-			result = productRepository.save(product);
+			result.setQuantityStock(result.getQuantityStock() - 1);
+			result = productRepository.save(result);
 		}
 		
 		return result;

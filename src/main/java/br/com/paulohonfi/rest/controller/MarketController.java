@@ -1,6 +1,10 @@
 package br.com.paulohonfi.rest.controller;
 
+import java.util.ArrayList;
 import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,52 +35,91 @@ public class MarketController {
 	
 	/**
 	 * Endpoint para obter o carrinho; Com seu respectivo total.
-	 * The getCart
 	 */
 	@GetMapping("/getCart")
-	public Cart getCart() {
-		return cartService.getCartSession();
+	public Cart getCart(HttpServletRequest request) {
+		final HttpSession session = request.getSession();
+		
+		if(session.getAttribute("cart") == null) {
+			session.setAttribute("cart", new Cart());  
+		}
+        
+		return (Cart) session.getAttribute("cart");
 	}
 	
 	/**
-	 * 	Endpoint para inserir produtos no carrinho;
-		Caso não exista um carrinho ele deverá criar um carrinho novo;
-		Retornar as informações do carrinho junto com os produtos inseridos.
-	 * @return 
+	 * 	Insere produtos no carrinho. Caso não exista um carrinho será criado um novo
+	 * @return informações do carrinho junto com os produtos inseridos.
 	 */
 	@PostMapping("/insertProductToCart")
-	public Cart insertProductToCart(@RequestBody Cart cart) {
+	public Cart insertProductToCart(HttpServletRequest request, @RequestBody Cart cart) {
+		if(request.getSession().getAttribute("cart") == null) {
+			request.getSession().setAttribute("cart", new Cart());  
+		}
+
+		final Cart cartSession = (Cart) request.getSession().getAttribute("cart");
+		
+		cartSession.setProducts(new ArrayList<Product>());
+		
 		for (Product product : cart.getProducts()) {
 			product = productService.save(product);
+			cartSession.getProducts().add(product);
 		}
 		
-		return cartService.insertProductToCart(cart);
-	}
-	
-	
-	/*
-	Endpoint para atualizar os produtos no carrinho;
-		Podendo atualizar a quantidade que será comprado de cada produto.
+		request.getSession().setAttribute("cart", cartSession);
 		
-		TODO - Erro na atualização
-	*/
-	
-	/*
-	Endpoint para limpar os produtos do carrinho;
-	*/
-	
-	/*
-	Endpoint para finalizar o carrinho;
-	*/
-	@GetMapping("/checkOutCart")
-	public Cart checkOutCart() {
-		return cartService.checkOutCart();
+		return cartSession;
 	}
 	
-	/*
-	Endpoint para consultar os pedidos (Carrinhos finalizados).
-		E Finalizar o carrinho.
-	*/
+	
+	/**
+	 * Atualiza os produtos no carrinho; Podendo atualizar a quantidade que será comprado de cada produto.
+	 */
+	@PostMapping("/updateCart")
+	public Cart updateCart(HttpServletRequest request, @RequestBody Cart cart) {
+		final Cart cartSession = (Cart) request.getSession().getAttribute("cart");
+		
+		cartSession.setProducts(new ArrayList<Product>());
+		
+		for (Product product : cart.getProducts()) {
+			product = productService.save(product);
+			cartSession.getProducts().add(product);
+		}
+		
+		request.getSession().setAttribute("cart", cartSession);
+		
+		return cartSession;
+	}
+	
+	
+	/**
+	 * Limpar todos os produtos do carrinho
+	 */
+	@GetMapping("/clearCart")
+	public Cart clearCart(HttpServletRequest request) {
+		final Cart cartSession = (Cart) request.getSession().getAttribute("cart");
+		
+		cartSession.setProducts(new ArrayList<Product>());
+		
+		request.getSession().setAttribute("cart", cartSession);
+		
+		return cartSession;
+	}
+	
+	/**
+	 * Finaliza o carrinho do usuário logado
+	 */
+	@GetMapping("/checkOutCart")
+	public Cart checkOutCart(HttpServletRequest request) {
+		final Cart cartSession = (Cart) request.getSession().getAttribute("cart");
+		request.getSession().setAttribute("cart", null);
+		
+		return cartService.checkOutCart(cartSession);
+	}
+	
+	/**
+	 * Consultar os pedidos já concluidos (Carrinhos finalizados).
+	 */
 	@GetMapping("/getConcludedCarts")
 	public List<Cart> getConcludedCarts() {
 		return cartService.findAllFinalized();
